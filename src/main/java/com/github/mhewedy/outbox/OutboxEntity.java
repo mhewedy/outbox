@@ -26,7 +26,6 @@ public class OutboxEntity { // TODO add auditable fields
     public Status status;
     public String errorMessage;
 
-
     public static OutboxEntity create(ObjectMapper objectMapper, Method method, List<Object> args) {
 
         var entity = new OutboxEntity();
