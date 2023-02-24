@@ -31,6 +31,8 @@ public class OutboxScheduler {
 
     @PostConstruct
     public void init() {
+        // does this introduces "at least once"? 😔
+        // should it be left to handle manual by the user along with versioning issues 😂
         outboxService.resetNonCompletedLockedOutbox();
     }
 
@@ -53,6 +55,7 @@ public class OutboxScheduler {
             Object[] paramValues = outbox.parseParamValues(objectMapper);
             Advised advised = (Advised) applicationContext.getBean(outbox.getServiceClass());
 
+            // removing the advisor and adding again after invocation otherwise we go into infinite loop
             var outboxAdvisor = removeOutboxAdvisor(advised);
             method.invoke(advised, paramValues);
             advised.addAdvisor(outboxAdvisor.pos(), outboxAdvisor.advisor());
