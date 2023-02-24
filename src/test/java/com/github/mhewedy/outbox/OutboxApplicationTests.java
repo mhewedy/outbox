@@ -16,6 +16,13 @@ class OutboxApplicationTests {
     void contextLoads() {
 
         calculatorService.add(1, new CalculatorService.Point(2, 3));
+        Thread.sleep(2 * 1000);
+        calculatorService.add(1, new CalculatorService.Point(2, 3));
+        calculatorService.add(1, new CalculatorService.Point(2, 3));
+        calculatorService.add(1, new CalculatorService.Point(2, 3));
+        calculatorService.add(1, new CalculatorService.Point(2, 3));
+        calculatorService.add(1, new CalculatorService.Point(2, 3));
+        calculatorService.add(1, new CalculatorService.Point(2, 3));
 
         Thread.sleep(10 * 1000);
     }

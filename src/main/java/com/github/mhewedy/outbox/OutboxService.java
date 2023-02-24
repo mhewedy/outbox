@@ -21,7 +21,7 @@ public class OutboxService {
     @Transactional
     public boolean tryLock(String lockId) {
 
-        int prefetchCount = 5;      // TODO read from props
+        int prefetchCount = 1;      // TODO read from props
 
         int updated = jdbcTemplate.update("""
                 update outbox_messages
@@ -37,5 +37,9 @@ public class OutboxService {
     @Transactional
     public void update(OutboxEntity outbox) {
         outboxRepository.save(outbox);
+    }
+
+    public void resetNonCompletedLockedOutbox() {
+        outboxRepository.resetLockedOutbox();
     }
 }
