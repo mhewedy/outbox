@@ -11,6 +11,7 @@ public class CalculatorService {
 
     @Outbox
     public void add(Integer a1, Point p) {
+        // code that spans network...
         log.info("result of add function: {}", a1 + p.x + p.y);
     }
 
