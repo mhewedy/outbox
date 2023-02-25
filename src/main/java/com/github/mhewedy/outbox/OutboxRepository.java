@@ -3,6 +3,7 @@ package com.github.mhewedy.outbox;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,6 +16,6 @@ public interface OutboxRepository extends JpaRepository<OutboxEntity, Long> {
 
     @Modifying
     @Transactional
-    @Query("update OutboxEntity set status = null where status = 0")
-    void resetLockedOutbox();
+    @Query("update OutboxEntity set status = null where status = :currentStatus")
+    void resetOutboxStatus(@Param("currentStatus") OutboxEntity.Status currentStatus);
 }

@@ -27,8 +27,7 @@ public class OutboxService {
                 update outbox_messages
                             set lock_id = ?,
                                 status = ?
-                            where status is null
-                            and id in (select top %d id from outbox_messages where status is null)
+                            where id in (select top %d id from outbox_messages where status is null)
                 """.formatted(prefetchCount), lockId, OutboxEntity.Status.LOCKED.ordinal());
 
         return updated > 0;
@@ -40,6 +39,6 @@ public class OutboxService {
     }
 
     public void resetNonCompletedLockedOutbox() {
-        outboxRepository.resetLockedOutbox();
+        outboxRepository.resetOutboxStatus(OutboxEntity.Status.LOCKED);
     }
 }

@@ -1,6 +1,6 @@
 ## Outbox
 
-A simple library to implement Outbox microservice pattern in Java.
+A simple library to implement Outbox microservice pattern in Java using DB Polling.
 
 ### Usage:
 
