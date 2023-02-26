@@ -1,5 +1,7 @@
-package com.github.mhewedy.outbox;
+package com.github.mhewedy.outbox.scheduler;
 
+import com.github.mhewedy.outbox.OutboxEntity;
+import com.github.mhewedy.outbox.OutboxRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;

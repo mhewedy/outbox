@@ -1,6 +1,9 @@
-package com.github.mhewedy.outbox;
+package com.github.mhewedy.outbox.scheduler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.mhewedy.outbox.OutboxAspect;
+import com.github.mhewedy.outbox.OutboxEntity;
+import com.github.mhewedy.outbox.cdc.DebeziumUtil;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -8,6 +11,7 @@ import org.springframework.aop.Advisor;
 import org.springframework.aop.PointcutAdvisor;
 import org.springframework.aop.aspectj.AbstractAspectJAdvice;
 import org.springframework.aop.framework.Advised;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClass;
 import org.springframework.context.ApplicationContext;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -21,6 +25,7 @@ import java.util.UUID;
 @Slf4j
 @Component
 @RequiredArgsConstructor
+@ConditionalOnMissingClass(DebeziumUtil.DEBEZIUM_CLASS)
 public class OutboxScheduler {
 
     private static PositionedAdvisor ADVISOR_CACHE;
