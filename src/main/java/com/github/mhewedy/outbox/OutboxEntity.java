@@ -11,7 +11,8 @@ import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "outbox_messages")
-public class OutboxEntity { // TODO add auditable fields
+public class OutboxEntity {
+    // TODO add auditable fields
     // TODO create multi db scripts
 
     @Id
@@ -68,15 +69,15 @@ public class OutboxEntity { // TODO add auditable fields
         return objectMapper.writeValueAsString(o);
     }
 
-    @SneakyThrows
-    private Class<?> forName(String className) {
-        return Class.forName(className);
-    }
-
     private Class<?>[] parseParamTypes() {
         return Arrays.stream(this.paramTypes.split(","))
                 .map(this::forName)
                 .toArray(Class<?>[]::new);
+    }
+
+    @SneakyThrows
+    private Class<?> forName(String className) {
+        return Class.forName(className);
     }
 
     public enum Status {

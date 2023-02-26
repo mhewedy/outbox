@@ -57,8 +57,11 @@ public class OutboxScheduler {
 
             // removing the advisor and adding again after invocation otherwise we go into infinite loop
             var outboxAdvisor = removeOutboxAdvisor(advised);
-            method.invoke(advised, paramValues);
-            advised.addAdvisor(outboxAdvisor.pos(), outboxAdvisor.advisor());
+            try {
+                method.invoke(advised, paramValues);
+            } finally {
+                advised.addAdvisor(outboxAdvisor.pos(), outboxAdvisor.advisor());
+            }
 
             outbox.status = OutboxEntity.Status.SUCCESS;
             outboxService.update(outbox);
