@@ -1,6 +1,6 @@
 create table outbox_messages
 (
-    id            varchar(50),
+    id            varchar(50) primary key not null,
     service_class varchar(100),
     method_name   varchar(100),
     param_types   varchar(max),
