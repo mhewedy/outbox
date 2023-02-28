@@ -23,9 +23,7 @@ A simple library to implement Outbox microservice pattern in Java using DB Polli
     
         @Outbox
         public void syncUser(UserEntity user) {
-            Map<?, ?> map = restTemplate.postForObject("https://gorest.co.in/public/v2/users",
-                    user, Map.class);
-    
+            Map<?, ?> map = restTemplate.postForObject("https://gorest.co.in/public/v2/users", user, Map.class);
             log.info("response from api: {}", map);
         }
     }
@@ -47,6 +45,6 @@ A simple library to implement Outbox microservice pattern in Java using DB Polli
         }
     }
     ```
-   The call to `useService.syncUser` method will return immediately, saved to `outbox_messages` table, 
+   The call to `useService.syncUser()` method will return immediately, saved to `outbox_messages` table, 
    and then a background process will make sure that method is being called (will try to execute the method and log the 
    exception to the database in case of error happens).
