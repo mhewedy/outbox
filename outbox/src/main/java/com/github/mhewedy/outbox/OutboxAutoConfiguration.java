@@ -27,8 +27,8 @@ public class OutboxAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    OutboxService outboxService(JdbcTemplate jdbcTemplate, OutboxProperties OutboxProperties) {
-        return new OutboxService(jdbcTemplate, OutboxProperties);
+    OutboxService outboxService(JdbcTemplate jdbcTemplate, OutboxProperties outboxProperties) {
+        return new OutboxService(jdbcTemplate, outboxProperties);
     }
 
     @Bean
