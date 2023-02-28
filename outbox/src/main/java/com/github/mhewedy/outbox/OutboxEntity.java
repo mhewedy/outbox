@@ -7,14 +7,14 @@ import org.springframework.jdbc.core.RowMapper;
 import java.lang.reflect.Method;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class OutboxEntity implements RowMapper<OutboxEntity> {
-    // TODO add auditable fields
-    // TODO create multi db scripts
+
+    public static final String PARAM_VALUES_SEP = "__,,__";
 
     public String id;
     public String serviceClass;
@@ -24,6 +24,8 @@ public class OutboxEntity implements RowMapper<OutboxEntity> {
     public String lockId;
     public Status status;
     public String errorMessage;
+    public Instant createdDate;
+    public Instant modifiedDate;
 
     public static OutboxEntity create(ObjectMapper objectMapper, Method method, List<Object> args) {
 
@@ -33,7 +35,8 @@ public class OutboxEntity implements RowMapper<OutboxEntity> {
         entity.paramTypes = Arrays.stream(method.getParameterTypes())
                 .map(Class::getName).collect(Collectors.joining(","));
         entity.paramValues = args.stream()
-                .map(it -> writeValueAsString(objectMapper, it)).collect(Collectors.joining("__,,__"));
+                .map(it -> writeValueAsString(objectMapper, it)).collect(Collectors.joining(PARAM_VALUES_SEP));
+        entity.createdDate = Instant.now();
         return entity;
     }
 
@@ -51,7 +54,7 @@ public class OutboxEntity implements RowMapper<OutboxEntity> {
     public Object[] parseParamValues(ObjectMapper objectMapper) {
         Class<?>[] paramTypes = this.parseParamTypes();
 
-        String[] paramValues = this.paramValues.split("__,,__");
+        String[] paramValues = this.paramValues.split(PARAM_VALUES_SEP);
 
         Object[] objects = new Object[paramValues.length];
 
@@ -90,6 +93,10 @@ public class OutboxEntity implements RowMapper<OutboxEntity> {
         entity.status = Status.values()[rs.getInt("status")];
         entity.errorMessage = rs.getString("error_message");
         return entity;
+    }
+
+    public Integer getStatusOrdinal() {
+        return status == null ? null : status.ordinal();
     }
 
     public enum Status {

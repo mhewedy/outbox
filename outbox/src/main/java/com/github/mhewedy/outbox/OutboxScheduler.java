@@ -13,6 +13,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -52,6 +53,7 @@ public class OutboxScheduler {
     private void processOutbox(OutboxEntity outbox) {
         log.info("processing outbox with id: {}", outbox.id);
         try {
+            // TODO implement retry
             Method method = outbox.getMethod();
             Object[] paramValues = outbox.parseParamValues(objectMapper);
             Advised advised = (Advised) applicationContext.getBean(outbox.getServiceClass());
@@ -68,6 +70,9 @@ public class OutboxScheduler {
             outboxService.update(outbox);
 
         } catch (Throwable ex) {
+            if (ex instanceof InvocationTargetException itex) {
+                ex = itex.getCause();
+            }
 
             StringWriter sw = new StringWriter();
             ex.printStackTrace(new PrintWriter(sw));

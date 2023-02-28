@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -35,6 +37,24 @@ public class OutboxService {
     }
 
     @Transactional
+    public void save(OutboxEntity outbox) {
+        jdbcTemplate.update("""
+                        insert into outbox_messages (id, service_class, method_name, param_types, param_values,
+                            lock_id, status, error_message, created_date)
+                        values (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        """,
+                UUID.randomUUID().toString(),
+                outbox.serviceClass,
+                outbox.methodName,
+                outbox.paramTypes,
+                outbox.paramValues,
+                outbox.lockId,
+                outbox.getStatusOrdinal(),
+                outbox.errorMessage,
+                Timestamp.from(outbox.createdDate));
+    }
+
+    @Transactional
     public void update(OutboxEntity outbox) {
         jdbcTemplate.update("""
                         update outbox_messages
@@ -44,7 +64,8 @@ public class OutboxService {
                         param_values = ?,
                         lock_id = ?,
                         status = ?,
-                        error_message = ?
+                        error_message = ?,
+                        modified_date = ?
                         where id = ?
                         """,
                 outbox.serviceClass,
@@ -52,29 +73,13 @@ public class OutboxService {
                 outbox.paramTypes,
                 outbox.paramValues,
                 outbox.lockId,
-                outbox.status.ordinal(),
+                outbox.getStatusOrdinal(),
                 outbox.errorMessage,
+                Timestamp.from(Instant.now()),
                 outbox.id);
     }
 
     public void resetNonCompletedLockedOutbox() {
         jdbcTemplate.update("update outbox_messages set status = null where status = ?", Status.LOCKED.ordinal());
-    }
-
-    @Transactional
-    public void save(OutboxEntity outboxEntity) {
-        jdbcTemplate.update("""
-                        insert into outbox_messages (id, service_class, method_name, param_types, param_values,
-                            lock_id, status, error_message)
-                        values (?, ?, ?, ?, ?, ?, ?, ?)
-                        """,
-                UUID.randomUUID().toString(),
-                outboxEntity.serviceClass,
-                outboxEntity.methodName,
-                outboxEntity.paramTypes,
-                outboxEntity.paramValues,
-                outboxEntity.lockId,
-                outboxEntity.status != null ? outboxEntity.status.ordinal() : null,
-                outboxEntity.errorMessage);
     }
 }
