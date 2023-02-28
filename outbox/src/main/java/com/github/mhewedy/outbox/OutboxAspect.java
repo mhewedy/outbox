@@ -7,8 +7,6 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -30,7 +28,15 @@ public class OutboxAspect {
             throw new RuntimeException("method annotated with @Outbox should have void return type: %s".formatted(method));
         }
 
-        outboxService.save(OutboxEntity.create(objectMapper, method, Arrays.asList(joinPoint.getArgs())));
+        boolean invokedFromScheduler = Arrays.stream((new Throwable()).getStackTrace())
+                .parallel().map(StackTraceElement::toString)
+                .anyMatch(it -> it.contains(OutboxScheduler.class.getName()));
+
+        if (invokedFromScheduler) {
+            joinPoint.proceed();
+        } else {
+            outboxService.save(OutboxEntity.create(objectMapper, method, Arrays.asList(joinPoint.getArgs())));
+        }
 
         return null;
     }

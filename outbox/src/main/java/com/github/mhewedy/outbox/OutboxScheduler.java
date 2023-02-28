@@ -4,9 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.aop.Advisor;
-import org.springframework.aop.PointcutAdvisor;
-import org.springframework.aop.aspectj.AbstractAspectJAdvice;
 import org.springframework.aop.framework.Advised;
 import org.springframework.context.ApplicationContext;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -15,15 +12,14 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
+
+import static com.github.mhewedy.outbox.OutboxEntity.Status;
 
 @Slf4j
 @RequiredArgsConstructor
 public class OutboxScheduler {
-
-    private static PositionedAdvisor ADVISOR_CACHE;
 
     private final ObjectMapper objectMapper;
     private final OutboxService outboxService;
@@ -58,15 +54,9 @@ public class OutboxScheduler {
             Object[] paramValues = outbox.parseParamValues(objectMapper);
             Advised advised = (Advised) applicationContext.getBean(outbox.getServiceClass());
 
-            // removing the advisor and adding again after invocation otherwise we go into infinite loop
-            var outboxAdvisor = removeOutboxAdvisor(advised);
-            try {
-                method.invoke(advised, paramValues);
-            } finally {
-                advised.addAdvisor(outboxAdvisor.pos(), outboxAdvisor.advisor());
-            }
+            method.invoke(advised, paramValues);
 
-            outbox.status = OutboxEntity.Status.SUCCESS;
+            outbox.status = Status.SUCCESS;
             outboxService.update(outbox);
 
         } catch (Throwable ex) {
@@ -79,34 +69,9 @@ public class OutboxScheduler {
             String exceptionAsString = sw.toString();
             log.warn(exceptionAsString);
 
-            outbox.status = OutboxEntity.Status.FAIL;
+            outbox.status = Status.FAIL;
             outbox.errorMessage = exceptionAsString;
             outboxService.update(outbox);
         }
-    }
-
-    private PositionedAdvisor removeOutboxAdvisor(Advised advised) {
-        if (ADVISOR_CACHE != null) {
-            advised.removeAdvisor(ADVISOR_CACHE.pos());
-            return ADVISOR_CACHE;
-        }
-
-        Advisor[] advisors = advised.getAdvisors();
-        for (int i = 0; i < advisors.length; i++) {
-            Advisor advisor = advisors[i];
-            if (advisor instanceof PointcutAdvisor pointcutAdvisor) {
-                if (pointcutAdvisor.getAdvice() instanceof AbstractAspectJAdvice aspectJAdvice) {
-                    if (aspectJAdvice.getAspectName().equalsIgnoreCase(OutboxAspect.class.getSimpleName())) {
-                        advised.removeAdvisor(advisor);
-                        ADVISOR_CACHE = new PositionedAdvisor(i, advisor);
-                        return ADVISOR_CACHE;
-                    }
-                }
-            }
-        }
-        throw new RuntimeException("OutboxAspect advisor not found");
-    }
-
-    record PositionedAdvisor(int pos, Advisor advisor) {
     }
 }
