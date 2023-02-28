@@ -14,7 +14,8 @@ import java.util.stream.Collectors;
 
 public class OutboxEntity implements RowMapper<OutboxEntity> {
 
-    public static final String PARAM_VALUES_SEP = "__,,__";
+    private static final String PARM_TYPES_SEP = ",";
+    private static final String PARAM_VALUES_SEP = "__,,__";
 
     public String id;
     public String serviceClass;
@@ -28,12 +29,11 @@ public class OutboxEntity implements RowMapper<OutboxEntity> {
     public Instant modifiedDate;
 
     public static OutboxEntity create(ObjectMapper objectMapper, Method method, List<Object> args) {
-
         var entity = new OutboxEntity();
         entity.serviceClass = method.getDeclaringClass().getName();
         entity.methodName = method.getName();
         entity.paramTypes = Arrays.stream(method.getParameterTypes())
-                .map(Class::getName).collect(Collectors.joining(","));
+                .map(Class::getName).collect(Collectors.joining(PARM_TYPES_SEP));
         entity.paramValues = args.stream()
                 .map(it -> writeValueAsString(objectMapper, it)).collect(Collectors.joining(PARAM_VALUES_SEP));
         entity.createdDate = Instant.now();
@@ -53,15 +53,12 @@ public class OutboxEntity implements RowMapper<OutboxEntity> {
     @SneakyThrows
     public Object[] parseParamValues(ObjectMapper objectMapper) {
         Class<?>[] paramTypes = this.parseParamTypes();
-
         String[] paramValues = this.paramValues.split(PARAM_VALUES_SEP);
-
         Object[] objects = new Object[paramValues.length];
 
         for (int i = 0; i < paramValues.length; i++) {
             objects[i] = objectMapper.readValue(paramValues[i], paramTypes[i]);
         }
-
         return objects;
     }
 
@@ -71,7 +68,7 @@ public class OutboxEntity implements RowMapper<OutboxEntity> {
     }
 
     private Class<?>[] parseParamTypes() {
-        return Arrays.stream(this.paramTypes.split(","))
+        return Arrays.stream(this.paramTypes.split(PARM_TYPES_SEP))
                 .map(this::forName)
                 .toArray(Class<?>[]::new);
     }

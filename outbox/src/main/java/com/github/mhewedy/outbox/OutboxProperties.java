@@ -7,6 +7,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "outbox")
 public class OutboxProperties {
 
-    public int prefetchCount = 1;
+    public int prefetchCount = 10;
     public int schedulerFixedRate = 1000;
 }
