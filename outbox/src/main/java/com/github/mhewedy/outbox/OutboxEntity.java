@@ -1,24 +1,22 @@
 package com.github.mhewedy.outbox;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.persistence.*;
 import lombok.SneakyThrows;
+import org.springframework.jdbc.core.RowMapper;
 
 import java.lang.reflect.Method;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
-@Entity
-@Table(name = "outbox_messages")
-public class OutboxEntity {
+public class OutboxEntity implements RowMapper<OutboxEntity> {
     // TODO add auditable fields
     // TODO create multi db scripts
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    public Long id;
-
+    public String id;
     public String serviceClass;
     public String methodName;
     public String paramTypes;
@@ -78,6 +76,20 @@ public class OutboxEntity {
     @SneakyThrows
     private Class<?> forName(String className) {
         return Class.forName(className);
+    }
+
+    @Override
+    public OutboxEntity mapRow(ResultSet rs, int rowNum) throws SQLException {
+        var entity = new OutboxEntity();
+        entity.id = rs.getString("id");
+        entity.serviceClass = rs.getString("service_class");
+        entity.methodName = rs.getString("method_name");
+        entity.paramTypes = rs.getString("param_types");
+        entity.paramValues = rs.getString("param_values");
+        entity.lockId = rs.getString("lock_id");
+        entity.status = Status.values()[rs.getInt("status")];
+        entity.errorMessage = rs.getString("error_message");
+        return entity;
     }
 
     public enum Status {

@@ -10,16 +10,15 @@ import org.springframework.aop.aspectj.AbstractAspectJAdvice;
 import org.springframework.aop.framework.Advised;
 import org.springframework.context.ApplicationContext;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.Method;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
 @Slf4j
-@Component
 @RequiredArgsConstructor
 public class OutboxScheduler {
 
@@ -36,8 +35,10 @@ public class OutboxScheduler {
         outboxService.resetNonCompletedLockedOutbox();
     }
 
-    @Scheduled(fixedRate = 1000)
+    @Scheduled(fixedRateString = "#{@'outbox-com.github.mhewedy.outbox.OutboxProperties'.schedulerFixedRate}")
     public void run() {
+        log.trace("OutboxScheduler start running");
+
         var lockId = UUID.randomUUID().toString();
 
         if (outboxService.tryLock(lockId)) {

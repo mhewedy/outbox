@@ -7,6 +7,7 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
@@ -14,12 +15,11 @@ import java.util.Arrays;
 
 @Slf4j
 @Aspect
-@Component
 @RequiredArgsConstructor
 public class OutboxAspect {
 
     private final ObjectMapper objectMapper;
-    private final OutboxRepository outboxRepository;
+    private final OutboxService outboxService;
 
     @Around("@annotation(Outbox)")
     public Object sendToOutbox(ProceedingJoinPoint joinPoint) throws Throwable {
@@ -30,7 +30,7 @@ public class OutboxAspect {
             throw new RuntimeException("method annotated with @Outbox should have void return type: %s".formatted(method));
         }
 
-        outboxRepository.save(OutboxEntity.create(objectMapper, method, Arrays.asList(joinPoint.getArgs())));
+        outboxService.save(OutboxEntity.create(objectMapper, method, Arrays.asList(joinPoint.getArgs())));
 
         return null;
     }
