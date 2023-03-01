@@ -28,16 +28,25 @@ public class OutboxAspect {
             throw new RuntimeException("method annotated with @Outbox should have void return type: %s".formatted(method));
         }
 
-        boolean invokedFromScheduler = Arrays.stream((new Throwable()).getStackTrace())
-                .parallel().map(StackTraceElement::toString)
-                .anyMatch(it -> it.contains(OutboxScheduler.class.getName()));
-
-        if (invokedFromScheduler) {
+        if (isInvokedFromScheduler()) {
             joinPoint.proceed();
         } else {
             outboxService.save(OutboxEntity.create(objectMapper, method, Arrays.asList(joinPoint.getArgs())));
         }
 
         return null;
+    }
+
+    private static boolean isInvokedFromScheduler() {
+        var schedulerIndex = 20;
+        StackTraceElement[] stackTrace = (new Throwable()).getStackTrace();
+        if (stackTrace.length >= schedulerIndex + 1) {
+            if (stackTrace[schedulerIndex].getClassName().equals(OutboxScheduler.class.getName())) {
+                return true;
+            }
+        }
+        return Arrays.stream(stackTrace)
+                .map(StackTraceElement::getClassName)
+                .anyMatch(it -> it.equalsIgnoreCase(OutboxScheduler.class.getName()));
     }
 }
