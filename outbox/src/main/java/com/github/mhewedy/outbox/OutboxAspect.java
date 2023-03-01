@@ -38,7 +38,6 @@ public class OutboxAspect {
     }
 
     private static boolean isInvokedFromScheduler() {
-        long start = System.currentTimeMillis();
         var schedulerIndex = 20;
         StackTraceElement[] stackTrace = (new Throwable()).getStackTrace();
         if (stackTrace.length >= schedulerIndex + 1) {
