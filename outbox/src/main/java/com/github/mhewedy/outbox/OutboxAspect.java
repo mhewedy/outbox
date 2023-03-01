@@ -38,6 +38,7 @@ public class OutboxAspect {
     }
 
     private static boolean isInvokedFromScheduler() {
+        long start = System.currentTimeMillis();
         var schedulerIndex = 20;
         StackTraceElement[] stackTrace = (new Throwable()).getStackTrace();
         if (stackTrace.length >= schedulerIndex + 1) {
@@ -45,8 +46,6 @@ public class OutboxAspect {
                 return true;
             }
         }
-        return Arrays.stream(stackTrace)
-                .map(StackTraceElement::getClassName)
-                .anyMatch(it -> it.equalsIgnoreCase(OutboxScheduler.class.getName()));
+        return Arrays.toString(stackTrace).contains(OutboxScheduler.class.getName());
     }
 }
