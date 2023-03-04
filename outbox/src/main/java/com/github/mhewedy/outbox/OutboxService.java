@@ -9,8 +9,6 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
-import static com.github.mhewedy.outbox.OutboxEntity.Status;
-
 @RequiredArgsConstructor
 public class OutboxService {
 
@@ -18,7 +16,11 @@ public class OutboxService {
     private final OutboxProperties outboxProperties;
 
     public List<OutboxDto> listByStatus(Status status) {
-        return jdbcTemplate.query("select * from outbox_messages where status = ? ", OutboxDto.ROW_MAPPER, status.ordinal());
+        return jdbcTemplate
+                .query("select * from outbox_messages where status = ? ", OutboxEntity.ROW_MAPPER, status.ordinal())
+                .stream()
+                .map(OutboxDto::fromEntity)
+                .toList();
     }
 
     /**

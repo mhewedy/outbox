@@ -1,8 +1,8 @@
 package com.github.mhewedy.outboxexample;
 
 import com.github.mhewedy.outbox.OutboxDto;
-import com.github.mhewedy.outbox.OutboxEntity;
 import com.github.mhewedy.outbox.OutboxService;
+import com.github.mhewedy.outbox.Status;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,7 +18,7 @@ public class AdminController {
 
     @GetMapping("/failed-messages")
     public List<OutboxDto> listFailedMessages() {
-        return outboxService.listByStatus(OutboxEntity.Status.FAIL);
+        return outboxService.listByStatus(Status.FAIL);
     }
 
     @PostMapping("/messages/{id}/pending")

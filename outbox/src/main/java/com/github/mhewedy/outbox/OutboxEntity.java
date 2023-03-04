@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class OutboxEntity {
+class OutboxEntity {
 
     private static final String PARM_TYPES_SEP = ",";
     private static final String PARAM_VALUES_SEP = "__,,__";
@@ -31,8 +31,6 @@ public class OutboxEntity {
     public String errorMessage;
     public Instant createdDate;
     public Instant modifiedDate;
-
-    public enum Status {PENDING, LOCKED, SUCCESS, FAIL}
 
     public static OutboxEntity create(ObjectMapper objectMapper, Method method, List<Object> args) {
         var entity = new OutboxEntity();

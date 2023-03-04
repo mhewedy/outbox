@@ -14,8 +14,6 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.UUID;
 
-import static com.github.mhewedy.outbox.OutboxEntity.Status;
-
 @Slf4j
 @RequiredArgsConstructor
 class OutboxScheduler {
