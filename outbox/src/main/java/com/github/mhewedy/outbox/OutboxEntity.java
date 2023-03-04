@@ -12,10 +12,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class OutboxEntity implements RowMapper<OutboxEntity> {
+public class OutboxEntity {
 
     private static final String PARM_TYPES_SEP = ",";
     private static final String PARAM_VALUES_SEP = "__,,__";
+
+    public static final RowMapper<OutboxEntity> ROW_MAPPER = new OutboxMapper();
 
     public String id;
     public String serviceClass;
@@ -28,6 +30,8 @@ public class OutboxEntity implements RowMapper<OutboxEntity> {
     public Instant createdDate;
     public Instant modifiedDate;
 
+    public enum Status {PENDING, LOCKED, SUCCESS, FAIL}
+
     public static OutboxEntity create(ObjectMapper objectMapper, Method method, List<Object> args) {
         var entity = new OutboxEntity();
         entity.serviceClass = method.getDeclaringClass().getName();
@@ -37,6 +41,7 @@ public class OutboxEntity implements RowMapper<OutboxEntity> {
         entity.paramValues = args.stream()
                 .map(it -> writeValueAsString(objectMapper, it)).collect(Collectors.joining(PARAM_VALUES_SEP));
         entity.createdDate = Instant.now();
+        entity.status = Status.PENDING;
         return entity;
     }
 
@@ -78,27 +83,20 @@ public class OutboxEntity implements RowMapper<OutboxEntity> {
         return Class.forName(className);
     }
 
-    @Override
-    public OutboxEntity mapRow(ResultSet rs, int rowNum) throws SQLException {
-        var entity = new OutboxEntity();
-        entity.id = rs.getString("id");
-        entity.serviceClass = rs.getString("service_class");
-        entity.methodName = rs.getString("method_name");
-        entity.paramTypes = rs.getString("param_types");
-        entity.paramValues = rs.getString("param_values");
-        entity.lockId = rs.getString("lock_id");
-        entity.status = Status.values()[rs.getInt("status")];
-        entity.errorMessage = rs.getString("error_message");
-        return entity;
-    }
+    private static class OutboxMapper implements RowMapper<OutboxEntity> {
 
-    public Integer getStatusOrdinal() {
-        return status == null ? null : status.ordinal();
-    }
-
-    public enum Status {
-        LOCKED,
-        SUCCESS,
-        FAIL
+        @Override
+        public OutboxEntity mapRow(ResultSet rs, int rowNum) throws SQLException {
+            var entity = new OutboxEntity();
+            entity.id = rs.getString("id");
+            entity.serviceClass = rs.getString("service_class");
+            entity.methodName = rs.getString("method_name");
+            entity.paramTypes = rs.getString("param_types");
+            entity.paramValues = rs.getString("param_values");
+            entity.lockId = rs.getString("lock_id");
+            entity.status = Status.values()[rs.getInt("status")];
+            entity.errorMessage = rs.getString("error_message");
+            return entity;
+        }
     }
 }

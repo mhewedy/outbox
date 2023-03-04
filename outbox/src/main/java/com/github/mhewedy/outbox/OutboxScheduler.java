@@ -1,7 +1,6 @@
 package com.github.mhewedy.outbox;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.aop.framework.Advised;
@@ -24,13 +23,6 @@ public class OutboxScheduler {
     private final ObjectMapper objectMapper;
     private final OutboxService outboxService;
     private final ApplicationContext applicationContext;
-
-    @PostConstruct
-    public void init() {
-        // does this introduces "at least once"? 😔
-        // should it be left to handle manual by the user along with versioning issues 😂
-        outboxService.resetNonCompletedLockedOutbox();
-    }
 
     @Scheduled(fixedRateString = "#{@'outbox-com.github.mhewedy.outbox.OutboxProperties'.schedulerFixedRate}")
     public void run() {
