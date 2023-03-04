@@ -17,6 +17,20 @@ public class OutboxService {
     private final JdbcTemplate jdbcTemplate;
     private final OutboxProperties outboxProperties;
 
+    public List<OutboxDto> listByStatus(Status status) {
+        return jdbcTemplate.query("select * from outbox_messages where status = ? ", OutboxDto.ROW_MAPPER, status.ordinal());
+    }
+
+    /**
+     * Set status of an outbox message to {@link Status#PENDING}, so to be picked by the scheduler.
+     *
+     * @param id the outbox id, returned from {@link #listByStatus(Status)}
+     */
+    public boolean setPending(String id) {
+        return jdbcTemplate.update("update outbox_messages set status = ? where id = ?",
+                Status.PENDING.ordinal(), id) > 0;
+    }
+
     List<OutboxEntity> findAllByLockId(String lockId) {
         return jdbcTemplate.query("select * from outbox_messages where lock_id = ? ", OutboxEntity.ROW_MAPPER, lockId);
     }

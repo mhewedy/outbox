@@ -18,7 +18,7 @@ import static com.github.mhewedy.outbox.OutboxEntity.Status;
 
 @Slf4j
 @RequiredArgsConstructor
-public class OutboxScheduler {
+class OutboxScheduler {
 
     private final ObjectMapper objectMapper;
     private final OutboxService outboxService;

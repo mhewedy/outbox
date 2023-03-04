@@ -14,7 +14,7 @@ import java.util.Arrays;
 @Slf4j
 @Aspect
 @RequiredArgsConstructor
-public class OutboxAspect {
+class OutboxAspect {
 
     private final ObjectMapper objectMapper;
     private final OutboxService outboxService;

@@ -45,6 +45,17 @@ A simple library to implement Outbox microservice pattern in Java using DB Polli
         }
     }
     ```
-   The call to `useService.syncUser()` method will return immediately, saved to `outbox_messages` table, 
-   and then a background process will make sure that method is being called (will try to execute the method and log the 
+   The call to `useService.syncUser()` method will return immediately, saved to `outbox_messages` table,
+   and then a background process will make sure that method is being called (will try to execute the method and log the
    exception to the database in case of error happens).
+
+> See the `UserController` in the example project.
+
+### Handling Failures:
+
+Sometimes, the Scheduler failed to successfully invoke the target method, maybe due to some network issue or os.
+So to overcome such issues, You can call a method in `OutboxService` called `setPending`, which will make sure
+that the status of the failed message is eligibility to be rescheduled by the scheduler.
+
+> See the `AdminController` in the example project.
+

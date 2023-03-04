@@ -7,9 +7,11 @@ import org.springframework.jdbc.core.RowMapper;
 import java.lang.reflect.Method;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class OutboxEntity {
@@ -96,6 +98,8 @@ public class OutboxEntity {
             entity.lockId = rs.getString("lock_id");
             entity.status = Status.values()[rs.getInt("status")];
             entity.errorMessage = rs.getString("error_message");
+            entity.createdDate = rs.getTimestamp("created_date").toInstant();
+            entity.modifiedDate = Optional.ofNullable(rs.getTimestamp("modified_date")).map(Timestamp::toInstant).orElse(null);
             return entity;
         }
     }

@@ -8,14 +8,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/users")
 @RequiredArgsConstructor
 public class UserController {
 
     private final UseService useService;
 
     @Transactional
-    @PostMapping("/users")
+    @PostMapping
     public void send(@RequestBody UserEntity user) {
         useService.saveUser(user);
         useService.syncUser(user);
