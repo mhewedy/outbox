@@ -2,6 +2,7 @@
 
 A simple library to implement Outbox microservice pattern in Java using DB Polling.
 
+Read this medium Post to know about what problem Outbox Pattern solves https://link.medium.com/p1FnyAMjWxb
 ### Usage:
 
 0. Create table `outbox_messages` from the file `schema.sql`
