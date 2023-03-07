@@ -22,7 +22,7 @@ first, make sure to reate table `outbox_messages` from the file `schema.sql`
             userRepository.save(user);
         }
     
-        @Outbox  // <---- 
+        @Outbox  // <---- You put the annotation on the method that communicate with external system (queue, another service, etc.)
         public void syncUser(UserEntity user) {
             Map<?, ?> map = restTemplate.postForObject("https://gorest.co.in/public/v2/users", user, Map.class);
             log.info("response from api: {}", map);
@@ -38,7 +38,7 @@ first, make sure to reate table `outbox_messages` from the file `schema.sql`
    
         private final UseService useService;
    
-        @Transactional @Outbox  // <---- 
+        @Transactional // <---- Now this can run in a single Transaction (hence both invoked methods will write to the database)
         @PostMapping("/users")
         public void send(@RequestBody UserEntity user) {
            useService.saveUser(user);
@@ -54,7 +54,7 @@ first, make sure to reate table `outbox_messages` from the file `schema.sql`
 
 ### Handling Failures:
 
-Sometimes, the Scheduler failed to successfully invoke the target method, maybe due to some network issue or os.
+Sometimes, the Scheduler failed to successfully invoke the target method, maybe due to some network issue etc.
 So to overcome such issues, You can call a method in `OutboxService` called `setPending`, which will make sure
 that the status of the failed message is eligibility to be rescheduled by the scheduler.
 
