@@ -5,7 +5,7 @@ A simple library to implement Outbox microservice pattern in Java using DB Polli
 Read this medium Post to know about what problem Outbox Pattern solves https://link.medium.com/p1FnyAMjWxb
 ### Usage:
 
-0. Create table `outbox_messages` from the file `schema.sql`
+first, make sure to reate table `outbox_messages` from the file `schema.sql`
 
 1. Annotate your method that contains code that contains network calls with `@Outbox`:
     ```java
