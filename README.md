@@ -22,7 +22,7 @@ first, make sure to reate table `outbox_messages` from the file `schema.sql`
             userRepository.save(user);
         }
     
-        @Outbox
+        @Outbox  // <---- 
         public void syncUser(UserEntity user) {
             Map<?, ?> map = restTemplate.postForObject("https://gorest.co.in/public/v2/users", user, Map.class);
             log.info("response from api: {}", map);
@@ -38,7 +38,7 @@ first, make sure to reate table `outbox_messages` from the file `schema.sql`
    
         private final UseService useService;
    
-        @Transactional
+        @Transactional @Outbox  // <---- 
         @PostMapping("/users")
         public void send(@RequestBody UserEntity user) {
            useService.saveUser(user);
